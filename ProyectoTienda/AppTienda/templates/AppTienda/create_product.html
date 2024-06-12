@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Product</title>
+</head>
+<body>
+    <h2>Create Product</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Product</button>
+    </form>
+    <h3>Categories</h3>
+    <ul>
+        {% for category in categories %}
+            <li>{{ category.id }} - {{ category.name }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'vendor_products' %}">Back to Products</a>
+</body>
+</html>

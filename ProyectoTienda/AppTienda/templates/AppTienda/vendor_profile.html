@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Profile</title>
+</head>
+<body>
+    <h1>{{ store.name }}</h1>
+    <h2>Profile Information</h2>
+    <ul>
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Role:</strong> {{ user.get_role_display }}</li>
+        <li><strong>Created at:</strong> {{ user.created_at }}</li>
+        <li><strong>First Name:</strong> {{ user.first_name }}</li>
+        <li><strong>Last Name:</strong> {{ user.last_name }}</li>
+    </ul>
+    <a href="{% url 'vendorHome' %}">Back to Dashboard</a>
+
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" style="border: none; background: none; padding: 0; color: blue; text-decoration: underline; cursor: pointer;">Logout</button>
+    </form>
+</body>
+</html>

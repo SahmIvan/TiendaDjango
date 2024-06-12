@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Store</title>
+</head>
+<body>
+    <h2>{% if form.instance.pk %}Edit Store{% else %}Create Store{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">{% if form.instance.pk %}Update Store{% else %}Create Store{% endif %}</button>
+    </form>
+    <a href="{% url 'vendorHome' %}">Back to Dashboard</a>
+</body>
+</html>

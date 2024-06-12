@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vendor Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ user.username }}!</h2>
+    <a href="{% url 'manage_store' %}">Manage Store</a>
+    
+    <a href="{% url 'vendor_profile' %}">Profile</a>
+
+    <a href="{% url 'vendor_products' %}">Products</a>
+    <!-- Otras opciones del dashboard -->
+</body>
+</html>
