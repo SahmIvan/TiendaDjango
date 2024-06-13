@@ -16,6 +16,15 @@ urlpatterns = [
     path('vendor/products/', views.vendor_products, name='vendor_products'),
     path('vendor/products/create/', views.create_product, name='create_product'),
     path('vendor/profile/', views.vendor_profile, name='vendor_profile'),
+    path('cart/', views.cart_view, name='cart'),
+    path('cart/remove/<int:item_id>/', views.remove_from_cart, {'remove_all': True}, name='remove_from_cart'),
+    path('cart/removes/<int:item_id>/', views.remove_from_carts, {'remove_all': False}, name='remove_from_carts'),
+    
+    # path('order_success/', views.order_success, name='order_success'),
+    
+
+
+
     
 ]
 
