@@ -140,9 +140,9 @@ def add_to_cart(request, product_id):
 @login_required
 def buy_now(request, product_id):
     add_to_cart(request, product_id)
-    return redirect(cart_view)
+    return redirect(checkout_views)
     
-def cart_view(request):
+def checkout_views(request):
     cart = ShoppingCart.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
 
@@ -175,8 +175,55 @@ def cart_view(request):
 
         return render(request, 'AppTienda/order_success.html')
 
-    return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+    return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
 
+def checkout_views(request):
+    cart = ShoppingCart.objects.get(user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart)
+
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
+    
+    # Agregar promoción a cada item del carrito
+    for item in cart_items:
+        item.promotion = Promotion.objects.filter(product=item.product).first()
+
+    if request.method == "POST":
+        address = request.POST['address']
+        card_number = request.POST['card_number']
+        payment_type = request.POST['payment_type']
+
+        payment = Payment.objects.create(payment_type=payment_type, card_number=card_number[-4:])
+        order = Orders.objects.create(customer=request.user, payment=payment, address=address, total_price=total_price)
+        
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                store=item.product.store,
+                quantity=item.quantity,
+                price=item.product.price,
+                promotion=item.promotion,
+                shipping_date=datetime.now() + timedelta(days=3)
+            )
+            item.delete()
+        cart.delete()
+
+        return render(request, 'AppTienda/order_success.html')
+
+    return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
+
+def cart_view(request):
+    cart = ShoppingCart.objects.get(user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart)
+
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
+    total_products = sum(item.quantity for item in cart_items)
+    # Agregar promoción a cada item del carrito
+    for item in cart_items:
+        item.promotion = Promotion.objects.filter(product=item.product).first()
+
+    
+    return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products':total_products})
 
 def remove_from_cart(request, item_id, remove_all=False):
     cart_item = get_object_or_404(CartItem, id=item_id)
