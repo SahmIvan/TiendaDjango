@@ -11,8 +11,7 @@ from .models import ShoppingCart, CartItem, Product, Store, Orders, OrderItem, P
 from datetime import datetime, timedelta
 
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+
 
 def register(request):
     if request.method == 'POST':
@@ -141,7 +140,8 @@ def add_to_cart(request, product_id):
 def buy_now(request, product_id):
     add_to_cart(request, product_id)
     return redirect(checkout_views)
-    
+
+@login_required
 def checkout_views(request):
     cart = ShoppingCart.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -176,42 +176,7 @@ def checkout_views(request):
         return render(request, 'AppTienda/order_success.html')
 
     return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
-
-def checkout_views(request):
-    cart = ShoppingCart.objects.get(user=request.user)
-    cart_items = CartItem.objects.filter(cart=cart)
-
-    total_price = sum(item.product.price * item.quantity for item in cart_items)
-    
-    # Agregar promoción a cada item del carrito
-    for item in cart_items:
-        item.promotion = Promotion.objects.filter(product=item.product).first()
-
-    if request.method == "POST":
-        address = request.POST['address']
-        card_number = request.POST['card_number']
-        payment_type = request.POST['payment_type']
-
-        payment = Payment.objects.create(payment_type=payment_type, card_number=card_number[-4:])
-        order = Orders.objects.create(customer=request.user, payment=payment, address=address, total_price=total_price)
-        
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                store=item.product.store,
-                quantity=item.quantity,
-                price=item.product.price,
-                promotion=item.promotion,
-                shipping_date=datetime.now() + timedelta(days=3)
-            )
-            item.delete()
-        cart.delete()
-
-        return render(request, 'AppTienda/order_success.html')
-
-    return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
-
+@login_required
 def cart_view(request):
     cart = ShoppingCart.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -224,7 +189,7 @@ def cart_view(request):
 
     
     return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products':total_products})
-
+@login_required
 def remove_from_cart(request, item_id, remove_all=False):
     cart_item = get_object_or_404(CartItem, id=item_id)
     if remove_all==True or cart_item.quantity == 1:
@@ -233,7 +198,7 @@ def remove_from_cart(request, item_id, remove_all=False):
         cart_item.quantity -= 1
         cart_item.save()
     return redirect('cart')
-
+@login_required
 def remove_from_carts(request, item_id, remove_all=False):
     cart_item = get_object_or_404(CartItem, id=item_id)
     if remove_all==True or cart_item.quantity == 1:
@@ -242,7 +207,7 @@ def remove_from_carts(request, item_id, remove_all=False):
         cart_item.quantity -= 1
         cart_item.save()
     return redirect('cart')
-
+@login_required
 def order_history(request):
     orders = Orders.objects.filter(customer=request.user).order_by('-order_date')
     
@@ -255,7 +220,7 @@ def order_history(request):
         })
 
     return render(request, 'AppTienda/order_history.html', {'orders_data': orders_data})
-
+@login_required
 def profile_view(request):
     user = request.user  # Obtener el usuario actual
     
@@ -337,7 +302,21 @@ def list_promotions(request):
 def products_with_offers(request):
     promotions = Promotion.objects.all()
     return render(request, 'AppTienda/products_with_offers.html', {'promotions': promotions})
+
+from django.db.models import Q
+from unidecode import unidecode
+from .models import Store
+
+def search_stores(request):
+    query = request.GET.get('q', '')
+    normalized_query = unidecode(query).lower()
     
+    stores = Store.objects.filter(
+        Q(name__icontains=normalized_query) |
+        Q(name__icontains=query)
+    )
+    
+    return render(request, 'AppTienda/search_results.html', {'stores': stores, 'query': query})
 
 def storeHome(request):
     return render(request, 'AppTienda/storeHome.html')

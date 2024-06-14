@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buscar Tiendas</title>
+</head>
+<body>
+    <h1>Buscar Tiendas</h1>
+    <form method="GET" action="{% url 'search_stores' %}">
+        <input type="text" name="q" placeholder="Buscar tiendas..." value="{{ query }}">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <h2>Resultados de la búsqueda</h2>
+    <div>
+        {% for store in stores %}
+            <div class="store">
+                <a href="{% url 'store_view' store.id %}">
+                    <img src="{{ store.image_url }}" alt="{{ store.name }}" width="100">
+                    <p>{{ store.name }}</p>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
