@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from .models import ShoppingCart, CartItem, Product, Store, Orders, OrderItem, Payment, Promotion, Category
+from .models import ShoppingCart, CartItem, Product, Store, Orders, OrderItem, Payment, Promotion, Category, Orders, OrderItem
 from datetime import datetime, timedelta
 
 
@@ -243,6 +243,18 @@ def remove_from_carts(request, item_id, remove_all=False):
         cart_item.save()
     return redirect('cart')
 
+def order_history(request):
+    orders = Orders.objects.filter(customer=request.user).order_by('-order_date')
+    
+    orders_data = []
+    for order in orders:
+        order_items = OrderItem.objects.filter(order=order)
+        orders_data.append({
+            'order': order,
+            'items': order_items
+        })
+
+    return render(request, 'AppTienda/order_history.html', {'orders_data': orders_data})
 
 def storeHome(request):
     return render(request, 'AppTienda/storeHome.html')

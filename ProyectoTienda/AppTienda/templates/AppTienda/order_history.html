@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historial de Pedidos</title>
+    <style>
+        .order {
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .order-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .order-item {
+            margin: 10px 0;
+        }
+        .order-item img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Historial de Pedidos</h1>
+    {% for order_data in orders_data %}
+        <div class="order">
+            <div class="order-header">
+                <p>Fecha de Pedido: {{ order_data.order.order_date }}</p>
+                <p>Precio Total: ${{ order_data.order.total_price }}</p>
+                <p>Método de Pago: {{ order_data.order.payment.payment_type }}</p>
+            </div>
+            {% for item in order_data.items %}
+                <div class="order-item">
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                    <p>Nombre: {{ item.product.name }}</p>
+                    <p>Tienda: {{ item.product.store.name }}</p>
+                    <p>Precio por Pieza:</p>: ${{ item.price }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</body>
+</html>
