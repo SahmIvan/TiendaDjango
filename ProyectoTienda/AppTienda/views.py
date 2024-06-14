@@ -9,8 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from .models import ShoppingCart, CartItem, Product, Store, Orders, OrderItem, Payment, Promotion, Category, Orders, OrderItem
 from datetime import datetime, timedelta
-
-
+from django.db.models import Q
+from unidecode import unidecode
+from .models import Store
 
 
 def register(request):
@@ -303,9 +304,7 @@ def products_with_offers(request):
     promotions = Promotion.objects.all()
     return render(request, 'AppTienda/products_with_offers.html', {'promotions': promotions})
 
-from django.db.models import Q
-from unidecode import unidecode
-from .models import Store
+
 
 def search_stores(request):
     query = request.GET.get('q', '')
@@ -317,9 +316,6 @@ def search_stores(request):
     )
     
     return render(request, 'AppTienda/search_results.html', {'stores': stores, 'query': query})
-
-def storeHome(request):
-    return render(request, 'AppTienda/storeHome.html')
 
 @login_required
 def vendorHome(request):
