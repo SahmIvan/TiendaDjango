@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Promociones Activas</title>
+</head>
+<body>
+    <h1>Promociones Activas</h1>
+    {% for promotion in promotions %}
+        <div>
+            <p>Producto: {{ promotion.product.name }}</p>
+            <p>Descuento: {{ promotion.discount }}%</p>
+            <p>Fecha de inicio: {{ promotion.start_date }}</p>
+            <p>Fecha de finalización: {{ promotion.end_date }}</p>
+            <p>Fecha de creación: {{ promotion.created_at }}</p>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="promotion_id" value="{{ promotion.id }}">
+                <button type="submit">Terminar Promoción</button>
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>

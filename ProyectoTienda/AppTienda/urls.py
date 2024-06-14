@@ -23,6 +23,10 @@ urlpatterns = [
     path('order-history/', views.order_history, name='order_history'),
     path('profile/', views.profile_view, name='profile'),
     path('store/<int:store_id>/', views.store_view, name='store_view'),
+    path('sales_history/', views.sales_history_view, name='sales_history'),
+    path('add_promotion/', views.add_promotion, name='add_promotion'),
+    path('list_promotions/', views.list_promotions, name='list_promotions'),
+    path('products_with_offers/', views.products_with_offers, name='products_with_offers'),
     
     # path('order_success/', views.order_success, name='order_success'),
     

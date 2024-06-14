@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm, StoreForm, ProductForm
+from .forms import CustomUserCreationForm, StoreForm, ProductForm, PromotionForm
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -271,6 +271,73 @@ def store_view(request, store_id):
     }
 
     return render(request, 'AppTienda/store_view.html', context)
+
+@login_required
+def sales_history_view(request):
+    try:
+        store = Store.objects.get(user=request.user)
+        # Filtrar los OrderItem que pertenecen a la tienda del usuario
+        order_items = OrderItem.objects.filter(store=store)
+
+        orders_data = {}
+        for item in order_items:
+            order_id = item.order.id
+            if order_id not in orders_data:
+                orders_data[order_id] = {
+                    'order_date': item.order.order_date,
+                    'total_price': 0,
+                    'payment_type': item.order.payment.payment_type,
+                    'items': []
+                }
+            orders_data[order_id]['total_price'] += item.price * item.quantity
+            orders_data[order_id]['items'].append(item)
+        
+    except Store.DoesNotExist:
+        return redirect('manage_store')  # Redirige al usuario para que cree su tienda primero
+    
+    return render(request, 'AppTienda/sales_history.html', {'orders_data': orders_data.values()})
+
+@login_required
+def add_promotion(request):
+    store = Store.objects.get(user=request.user)
+    if request.method == 'POST':
+        form = PromotionForm(request.POST, user=request.user)
+        if form.is_valid():
+            promotion = form.save()
+            # Actualizar el precio del producto
+            product = promotion.product
+            original_price = product.price
+            discount = promotion.discount / 100
+            product.price = original_price * (1 - discount)
+            product.save()
+            return redirect('list_promotions')
+    else:
+        form = PromotionForm(user=request.user)
+    return render(request, 'AppTienda/add_promotion.html', {'form': form})
+
+@login_required
+def list_promotions(request):
+    store = Store.objects.get(user=request.user)
+    promotions = Promotion.objects.filter(product__store=store)
+
+    if request.method == 'POST':
+        promotion_id = request.POST.get('promotion_id')
+        if promotion_id:
+            promotion = Promotion.objects.get(id=promotion_id)
+            product = promotion.product
+            discount = promotion.discount / 100
+            original_price = product.price / (1 - discount)
+            product.price = original_price
+            product.save()
+            promotion.delete()
+            return redirect('list_promotions')
+
+    return render(request, 'AppTienda/list_promotions.html', {'promotions': promotions})
+
+def products_with_offers(request):
+    promotions = Promotion.objects.all()
+    return render(request, 'AppTienda/products_with_offers.html', {'promotions': promotions})
+    
 
 def storeHome(request):
     return render(request, 'AppTienda/storeHome.html')

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Productos con Ofertas</title>
+</head>
+<body>
+    <h1>Productos con Ofertas</h1>
+    <div>
+        {% for promotion in promotions %}
+            <div class="product">
+                <a href="{% url 'product_detail' promotion.product.id %}">
+                    <img src="{{ promotion.product.image_url }}" alt="{{ promotion.product.name }}" width="100">
+                </a>
+                <div class="product-info">
+                    <a href="{% url 'product_detail' promotion.product.id %}">
+                        <h2>{{ promotion.product.name }}</h2>
+                    </a>
+                    <p>Tienda: {{ promotion.product.store.name }}</p>
+                    <p>Descuento: {{ promotion.discount }}%</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
