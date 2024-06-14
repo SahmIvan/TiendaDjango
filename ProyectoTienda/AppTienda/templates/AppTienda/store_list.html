@@ -20,6 +20,7 @@
     <div class="stores">
         {% for store in stores %}
             <div class="store">
+                <a href="{% url 'store_view' store.id %}">
                 <img src="{{ store.image.url }}" alt="{{ store.name }}">
                 <p>{{ store.name }}</p>
             </div>

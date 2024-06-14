@@ -256,6 +256,22 @@ def order_history(request):
 
     return render(request, 'AppTienda/order_history.html', {'orders_data': orders_data})
 
+def profile_view(request):
+    user = request.user  # Obtener el usuario actual
+    
+    return render(request, 'AppTienda/profile.html', {'user': user})
+
+def store_view(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+    products = Product.objects.filter(store=store)
+
+    context = {
+        'store': store,
+        'products': products
+    }
+
+    return render(request, 'AppTienda/store_view.html', context)
+
 def storeHome(request):
     return render(request, 'AppTienda/storeHome.html')
 

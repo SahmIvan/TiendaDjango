@@ -21,7 +21,8 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', views.remove_from_cart, {'remove_all': True}, name='remove_from_cart'),
     path('cart/removes/<int:item_id>/', views.remove_from_carts, {'remove_all': False}, name='remove_from_carts'),
     path('order-history/', views.order_history, name='order_history'),
-    
+    path('profile/', views.profile_view, name='profile'),
+    path('store/<int:store_id>/', views.store_view, name='store_view'),
     
     # path('order_success/', views.order_success, name='order_success'),
     
