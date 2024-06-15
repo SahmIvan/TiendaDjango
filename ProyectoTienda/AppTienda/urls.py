@@ -1,6 +1,8 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
+from django.conf.urls import handler404
 from . import views
+
+handler404 = 'AppTienda.views.error_404_view'
 
 urlpatterns = [
     path("", views.store_list, name="index"),

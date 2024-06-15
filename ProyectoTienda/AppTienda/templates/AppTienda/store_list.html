@@ -21,7 +21,7 @@
         {% for store in stores %}
             <div class="store">
                 <a href="{% url 'store_view' store.id %}">
-                <img src="{{ store.image.url }}" alt="{{ store.name }}">
+                <img src="{{ store.image_url }}" alt="{{ store.name }}" width="100">
                 <p>{{ store.name }}</p>
             </div>
         {% endfor %}
@@ -31,12 +31,21 @@
         {% for product in products %}
             <div class="product">
                 <a href="{% url 'product_detail' product.id %}">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" width="100">
                     <p>{{ product.name }}</p>
                 </a>
             </div>
         {% endfor %}
     </div>
     
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" style="border: none; background: none; padding: 0; color: blue; text-decoration: underline; cursor: pointer;">Logout</button>
+    </form>
+
+    <div>
+        <a href="{% url 'login' %}">login</a>
+    </div>
+
 </body>
 </html>

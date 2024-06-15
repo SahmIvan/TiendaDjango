@@ -1,20 +1,32 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm, StoreForm, ProductForm, PromotionForm
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect
 from .models import ShoppingCart, CartItem, Product, Store, Orders, OrderItem, Payment, Promotion, Category, Orders, OrderItem
 from datetime import datetime, timedelta
 from django.db.models import Q
 from unidecode import unidecode
 from .models import Store
+from .decorators import user_passes_test_404
 
+def user_is_customer(user):
+    return user.role == 'customer'
+
+def user_is_vendor(user):
+    return user.role == 'vendor'
+
+def user_is_admin(user):
+    return user.role == 'admin'
 
 def register(request):
+    if request.user.is_authenticated:
+        return HttpResponseForbidden("You are already registered.")
+    
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -29,6 +41,9 @@ def register(request):
     return render(request, 'AppTienda/register.html', {'form': form})
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseForbidden("You are already logged in.")
+    
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -43,8 +58,9 @@ def login_view(request):
                     return redirect('storeHome')
     else:
         form = AuthenticationForm()
-    return render(request, 'AppTienda/login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
 # General Access
+
 def store_list(request):
     stores = Store.objects.all()
     products = [store.product_set.first() for store in stores]
@@ -57,6 +73,7 @@ def product_detail(request, product_id):
 
 # Vendor Access Required ONLY
 @login_required
+@user_passes_test_404(user_is_vendor)
 def manage_store(request):
     try:
         store = Store.objects.get(user=request.user)
@@ -82,6 +99,7 @@ def manage_store(request):
 
  
 @login_required
+@user_passes_test_404(user_is_vendor)
 def vendor_products(request):
     try:
         store = Store.objects.get(user=request.user)
@@ -92,6 +110,7 @@ def vendor_products(request):
     return render(request, 'AppTienda/vendor_products.html', {'products': products})
 
 @login_required
+@user_passes_test_404(user_is_vendor)
 def create_product(request):
     try:
         store = Store.objects.get(user=request.user)
@@ -113,6 +132,7 @@ def create_product(request):
     return render(request, 'AppTienda/create_product.html', {'form': form, 'categories': categories})
 
 @login_required
+@user_passes_test_404(user_is_vendor)
 def vendor_profile(request):
     user = request.user
     try:
@@ -128,6 +148,7 @@ def vendor_profile(request):
 
 # Only customer can access, login is required
 @login_required
+@user_passes_test_404(user_is_customer)
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart, created = ShoppingCart.objects.get_or_create(user=request.user)
@@ -138,11 +159,13 @@ def add_to_cart(request, product_id):
     return redirect('product_detail', product_id=product_id)
 
 @login_required
+@user_passes_test_404(user_is_customer)
 def buy_now(request, product_id):
     add_to_cart(request, product_id)
     return redirect(checkout_views)
 
 @login_required
+@user_passes_test_404(user_is_customer)
 def checkout_views(request):
     cart = ShoppingCart.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -178,6 +201,7 @@ def checkout_views(request):
 
     return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
 @login_required
+@user_passes_test_404(user_is_customer)
 def cart_view(request):
     cart = ShoppingCart.objects.get(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -191,6 +215,7 @@ def cart_view(request):
     
     return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products':total_products})
 @login_required
+@user_passes_test_404(user_is_customer)
 def remove_from_cart(request, item_id, remove_all=False):
     cart_item = get_object_or_404(CartItem, id=item_id)
     if remove_all==True or cart_item.quantity == 1:
@@ -200,6 +225,7 @@ def remove_from_cart(request, item_id, remove_all=False):
         cart_item.save()
     return redirect('cart')
 @login_required
+@user_passes_test_404(user_is_customer)
 def remove_from_carts(request, item_id, remove_all=False):
     cart_item = get_object_or_404(CartItem, id=item_id)
     if remove_all==True or cart_item.quantity == 1:
@@ -209,6 +235,7 @@ def remove_from_carts(request, item_id, remove_all=False):
         cart_item.save()
     return redirect('cart')
 @login_required
+@user_passes_test_404(user_is_customer)
 def order_history(request):
     orders = Orders.objects.filter(customer=request.user).order_by('-order_date')
     
@@ -239,6 +266,7 @@ def store_view(request, store_id):
     return render(request, 'AppTienda/store_view.html', context)
 
 @login_required
+@user_passes_test_404(user_is_vendor)
 def sales_history_view(request):
     try:
         store = Store.objects.get(user=request.user)
@@ -264,6 +292,7 @@ def sales_history_view(request):
     return render(request, 'AppTienda/sales_history.html', {'orders_data': orders_data.values()})
 
 @login_required
+@user_passes_test_404(user_is_vendor)
 def add_promotion(request):
     store = Store.objects.get(user=request.user)
     if request.method == 'POST':
@@ -282,6 +311,7 @@ def add_promotion(request):
     return render(request, 'AppTienda/add_promotion.html', {'form': form})
 
 @login_required
+@user_passes_test_404(user_is_vendor)
 def list_promotions(request):
     store = Store.objects.get(user=request.user)
     promotions = Promotion.objects.filter(product__store=store)
@@ -317,7 +347,12 @@ def search_stores(request):
     
     return render(request, 'AppTienda/search_results.html', {'stores': stores, 'query': query})
 
+def error_404_view(request, exception=None):
+    return render(request, 'AppTienda/404.html', {})
+
+
 @login_required
+@user_passes_test_404(user_is_vendor)
 def vendorHome(request):
     return render(request, 'AppTienda/vendorHome.html')
 
