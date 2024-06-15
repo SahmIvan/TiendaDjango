@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Checkoout</title>
+    <title>Checkout</title>
 </head>
 <body>
     <h1>Resumen de la Compra</h1>
@@ -18,6 +18,13 @@
                     <p>Promoción: {{ item.promotion.id }}</p>
                 {% endif %}
                 
+                {% if messages %}
+                    <div>
+                        {% for message in messages %}
+                            <p style="color: red;">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 
             </div>
         {% endfor %}

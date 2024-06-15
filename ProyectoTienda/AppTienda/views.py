@@ -13,7 +13,7 @@ from django.db.models import Q
 from unidecode import unidecode
 from .models import Store
 from .decorators import user_passes_test_404
-
+from django.contrib import messages
 def user_is_customer(user):
     return user.role == 'customer'
 
@@ -177,6 +177,16 @@ def checkout_views(request):
         item.promotion = Promotion.objects.filter(product=item.product).first()
 
     if request.method == "POST":
+        insufficient_stock_items = []
+        for item in cart_items:
+            if item.quantity > item.product.stock:
+                insufficient_stock_items.append(item)
+
+        if insufficient_stock_items:
+            for item in insufficient_stock_items:
+                messages.error(request, f"Stock insuficiente para {item.product.name}. Disponible: {item.product.stock}")
+            return render(request, 'AppTienda/checkout.html', {'cart_items': cart_items, 'total_price': total_price})
+
         address = request.POST['address']
         card_number = request.POST['card_number']
         payment_type = request.POST['payment_type']
@@ -194,6 +204,9 @@ def checkout_views(request):
                 promotion=item.promotion,
                 shipping_date=datetime.now() + timedelta(days=3)
             )
+            # Actualizar el stock del producto
+            item.product.stock -= item.quantity
+            item.product.save()
             item.delete()
         cart.delete()
 
