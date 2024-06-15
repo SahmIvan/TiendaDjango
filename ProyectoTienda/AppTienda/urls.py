@@ -38,3 +38,7 @@ urlpatterns = [
 ]
 
 # http://127.0.0.1:8000/tienda/product/1/
+
+urlpatterns += [
+    path('accounts/login/', views.login_view),  # Redirige a la vista personalizada
+]

@@ -55,7 +55,7 @@ def login_view(request):
                 if user.role == 'vendor':
                     return redirect('vendorHome')
                 else:
-                    return redirect('storeHome')
+                    return redirect('/')
     else:
         form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
@@ -352,7 +352,18 @@ def error_404_view(request, exception=None):
 
 
 @login_required
-@user_passes_test_404(user_is_vendor)
+@user_passes_test(user_is_vendor, login_url='login')
 def vendorHome(request):
-    return render(request, 'AppTienda/vendorHome.html')
+    try:
+        # Obtener la tienda del usuario vendedor actual
+        store = Store.objects.get(user=request.user)
+    except Store.DoesNotExist:
+        # Manejar el caso en que la tienda no exista
+        store = None
+    
+    context = {
+        'user': request.user,
+        'store': store,
+    }
 
+    return render(request, 'AppTienda/vendorHome.html', context)

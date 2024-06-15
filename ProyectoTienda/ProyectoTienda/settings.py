@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+    'AppTienda.middleware.RedirectAccountsLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'ProyectoTienda.urls'
@@ -123,6 +123,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+# Diseño y planeacion, funcional de la aplicacion, estructura de base de datos, vistas, html 
+# funcional, filtracion de acceso por usuarios por Ivan Jassiel Gutierrez Martinez
+# https://www.linkedin.com/in/ivan-gutierrez-se/
 
 STATIC_URL = 'static/'
 
@@ -130,3 +133,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = '/tienda/login/'
+LOGIN_REDIRECT_URL = '/tienda/'
+LOGOUT_REDIRECT_URL = '/tienda/login/'

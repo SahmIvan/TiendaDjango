@@ -5,10 +5,21 @@
 </head>
 <body>
     <h2>Welcome, {{ user.username }}!</h2>
-    <a href="{% url 'manage_store' %}">Manage Store</a>
     
-    <a href="{% url 'vendor_profile' %}">Profile</a>
+    <h3>Store Information</h3>
+    <p><strong>Name:</strong> {{ store.name }}</p>
+    <p><strong>Description:</strong> {{ store.description }}</p>
+    <p><strong>Address:</strong> {{ store.address }}</p>
+    <p><strong>Google Maps Link:</strong> {{ store.google_maps_link }}</p>
+    <p><strong>Created At:</strong> {{ store.created_at }}</p>
+    {% if store.image_url %}
+    <img src="{{ store.image_url }}" alt="Store Image">
+    {% endif %}
 
+    <hr>
+    
+    <a href="{% url 'manage_store' %}">Manage Store</a>
+    <a href="{% url 'vendor_profile' %}">Profile</a>
     <a href="{% url 'vendor_products' %}">Products</a>
     <!-- Otras opciones del dashboard -->
 </body>
