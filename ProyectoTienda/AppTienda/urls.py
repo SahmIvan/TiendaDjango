@@ -28,7 +28,7 @@ urlpatterns = [
     path('list_promotions/', views.list_promotions, name='list_promotions'),
     path('products_with_offers/', views.products_with_offers, name='products_with_offers'),
     path('search_stores/', views.search_stores, name='search_stores'),
-    
+    path('product/edit/<int:product_id>/', views.edit_product, name='edit_product'),
     # path('order_success/', views.order_success, name='order_success'),
     
 

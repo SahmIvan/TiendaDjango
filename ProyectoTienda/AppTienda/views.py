@@ -167,7 +167,7 @@ def buy_now(request, product_id):
 @login_required
 @user_passes_test_404(user_is_customer)
 def checkout_views(request):
-    cart = ShoppingCart.objects.get(user=request.user)
+    cart, created = ShoppingCart.objects.get_or_create(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
 
     total_price = sum(item.product.price * item.quantity for item in cart_items)
@@ -216,7 +216,7 @@ def checkout_views(request):
 @login_required
 @user_passes_test_404(user_is_customer)
 def cart_view(request):
-    cart = ShoppingCart.objects.get(user=request.user)
+    cart, created = ShoppingCart.objects.get_or_create(user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
 
     total_price = sum(item.product.price * item.quantity for item in cart_items)
@@ -225,8 +225,7 @@ def cart_view(request):
     for item in cart_items:
         item.promotion = Promotion.objects.filter(product=item.product).first()
 
-    
-    return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products':total_products})
+    return render(request, 'AppTienda/cart.html', {'cart_items': cart_items, 'total_price': total_price, 'total_products': total_products})
 @login_required
 @user_passes_test_404(user_is_customer)
 def remove_from_cart(request, item_id, remove_all=False):
@@ -380,3 +379,24 @@ def vendorHome(request):
     }
 
     return render(request, 'AppTienda/vendorHome.html', context)
+
+@login_required
+@user_passes_test_404(user_is_vendor)
+def edit_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    store = product.store
+
+    if store.user != request.user:
+        return HttpResponseForbidden("No tienes permiso para editar este producto.")
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('vendor_products')
+    else:
+        form = ProductForm(instance=product)
+
+    categories = Category.objects.all()
+
+    return render(request, 'AppTienda/edit_product.html', {'form': form, 'categories': categories, 'product': product})
